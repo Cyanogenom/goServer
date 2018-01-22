@@ -20,6 +20,7 @@ const (
 	user      = "postgres"
 	dbname    = "data"
 	tableName = "json_data"
+	password  = "user password"
 )
 
 type jsonPostData struct {
@@ -122,8 +123,8 @@ func handler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func main() {
 
 	//connect to db
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable",
-		host, portDB, user, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable password=%s",
+		host, portDB, user, dbname, password)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
