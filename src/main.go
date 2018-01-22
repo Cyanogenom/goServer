@@ -29,10 +29,6 @@ type dbSendData struct {
 	Data string
 	Time int64
 }
-type jsonParams struct {
-	Max int64
-	Min int64
-}
 
 func getMethod(db *sql.DB, max string, min string) ([]byte, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE time >= %s AND time <= %s", tableName, min, max)
@@ -75,30 +71,31 @@ func postMethod(db *sql.DB, data jsonPostData) error {
 func handler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	err := db.Ping()
 	if err != nil {
-		fmt.Println("11!")
-		panic(err)
+		//fmt.Println("11!", err.Error())
+		http.Error(w, err.Error(), 400)
+		return
 	}
 
 	if r.Method == "POST" {
 		data := jsonPostData{}
 		if r.Body == nil {
-			fmt.Println("2!")
+			//fmt.Println("2!")
 			http.Error(w, "Please send a request body", 400)
 			return
 		}
 		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
-			fmt.Println("3!")
+			//fmt.Println("3!")
 			http.Error(w, err.Error(), 400)
 			return
 		}
 		err = postMethod(db, data)
 		if err != nil {
-			fmt.Println("4!")
+			//fmt.Println("4!")
 			http.Error(w, err.Error(), 400)
 			return
 		}
-
+		fmt.Fprintf(w, "Ok")
 	} else if r.Method == "GET" {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -113,7 +110,7 @@ func handler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 		js, err := getMethod(db, max, min)
 		if err != nil {
-			fmt.Println("5!")
+			//fmt.Println("5!")
 			http.Error(w, err.Error(), 400)
 			return
 		}
@@ -130,7 +127,7 @@ func main() {
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		fmt.Println("10!")
+		//fmt.Println("10!")
 		panic(err)
 	}
 	defer db.Close()
@@ -141,7 +138,7 @@ func main() {
 	})
 	err = http.ListenAndServe(port, nil)
 	if err != nil {
-		fmt.Println("1!")
+		//fmt.Println("1!")
 		log.Fatal("ListenAndServe", err)
 	}
 }
